@@ -9,6 +9,7 @@ public class bossStateManager : MonoBehaviour
     public bool IsChasing;
     public bool CloseAttack;
     public bool FarAttack;
+    public int CountHardAttack = 3;
 
     //ให้บอส ตบซักทีก่อน ถึงจะอรุญาตให้มัน โจมตีไกลกับผู้เล่นได้
     public bool AlreadyAttackClosePlayer;
@@ -47,7 +48,7 @@ public class bossStateManager : MonoBehaviour
             IsChasing = false;
             CloseAttack = true;
         }
-        else{CloseAttack = false;}
+        else{CloseAttack = false; CountHardAttack = 3; } //ถ้าโจมตีได้ 2 แล้วหลุดเสตท จะ เริ่มนับโจมตีใหม่อีกรอบ 
         // FarAttack
         if (distance > 10 && distance <= 20 && AlreadyAttackClosePlayer == true) //ถ้าบอสตามไม่ทัน มันจะหยุดวิ่งและตีไกล แต่ถ้าผู้เล่นอยู่ไกลเกินมันจะ idle
         {
@@ -55,6 +56,6 @@ public class bossStateManager : MonoBehaviour
             CloseAttack = false;
             FarAttack = true;
         }
-        else { FarAttack = false; }
+        else { FarAttack = false; CountHardAttack = 3; }//ถ้าโจมตีได้ 2 แล้วหลุดเสตท จะ เริ่มนับโจมตีใหม่อีกรอบ 
     }
 }
