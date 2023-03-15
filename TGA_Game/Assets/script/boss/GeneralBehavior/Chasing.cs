@@ -4,74 +4,40 @@ using UnityEngine;
 
 public class Chasing : MonoBehaviour
 {
-    bossStateManager bossmeg;
-
     public Transform player;
-    public float moveSpeed = 5f;
+    public float speed = 5f;
+    public float maxDistance = 10f;
+    public float stoppingDistance = 2f;
 
-    private bool canSeePlayer = true; // flag to track if the boss can see the player
+    private Rigidbody rb;
 
-    private void Awake()
-    {
-        bossmeg = FindObjectOfType<bossStateManager>();
-    }
     private void Start()
     {
-
-    }
-    private void Update()
-    {
-        ChasingPlayer();
+        rb = GetComponent<Rigidbody>();
     }
 
-    IEnumerator WaitAndCheckForPlayer()
+    private void FixedUpdate()
     {
-        yield return new WaitForSeconds(1f); // wait for 1 second before checking again
+        // Calculate the direction and distance to the player
+        Vector3 direction = player.position - transform.position;
+        float distance = direction.magnitude;
 
-        // calculate direction to player
-        Vector3 dirToPlayer = player.position - transform.position;
-
-        // check if there is an obstacle between the boss and the player
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, dirToPlayer, out hit))
+        // If the player is within max distance, move towards them
+        if (distance <= maxDistance)
         {
-            if (hit.collider.gameObject.tag == "Player")
+            // If there's nothing in front of us, move towards the player
+            if (!Physics.Raycast(transform.position, transform.forward, stoppingDistance))
             {
-                // the player is visible again, so resume chasing
-                canSeePlayer = true;
+                rb.velocity = direction.normalized * speed;
+            }
+            else // If there's something in front of us, stop moving
+            {
+                rb.velocity = Vector3.zero;
             }
         }
-    } //เช็ค ยังว่าหาเจอมั้ยทุกๆ 1 วิ ถ้าผู้เล่นหายไปจากสายตา
-    void ChasingPlayer() //เอาโค้ดเช็คระยะห่างมากำหนดการเคลื่อนไหวของบอส การไล่จะหยุดลงเมื่อผู้เล่นแอบหลังบางอย่าง
-    {
-        if (canSeePlayer && bossmeg.IsChasing == true)
+        else // If the player is outside max distance, stop moving
         {
-            //boss manager check 
-            bossmeg.IsChasing = true;
-            // calculate direction to player
-            Vector3 dirToPlayer = player.position - transform.position;
-
-            // move towards player
-            transform.Translate(dirToPlayer.normalized * moveSpeed * Time.deltaTime, Space.World);
-
-            // check if there is an obstacle between the boss and the player
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position, dirToPlayer, out hit))
-            {
-                if (hit.collider.gameObject.tag != "Player")
-                {
-                    // the boss cannot see the player, so stop chasing
-                    canSeePlayer = false;
-                    print("can't see wUw");
-                }
-            }
-        } //ผู้เล่นห่างจากบอส 8 ไล่เลย 
-        else
-        {
-            // the boss cannot see the player, so wait and periodically check if player is visible again
-            StartCoroutine(WaitAndCheckForPlayer());
-            //boss manager check 
-            bossmeg.IsChasing = false;
+            rb.velocity = Vector3.zero;
         }
     }
 
